@@ -1,0 +1,43 @@
+﻿@model IEnumerable<WebApplication3.ViewModels.TeacherViewModel>
+
+@{
+    ViewData["Title"] = "قائمة المدرسين";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (User.IsInRole("Admin"))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">اضافة مدرس جديد</a>
+    </p>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>الاسم</th>
+            @if (User.IsInRole("Admin"))
+            {
+                <th>خيارات</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var teacher in Model)
+        {
+            <tr>
+                <td>@teacher.Name</td>
+                @if (User.IsInRole("Admin"))
+                {
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@teacher.Id" class="btn btn-warning btn-sm">تعديل</a>
+                        <form asp-action="Delete" asp-route-id="@teacher.Id" method="post" style="display:inline;" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
+                            <button type="submit" class="btn btn-danger btn-sm">حذف</button>
+                        </form>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

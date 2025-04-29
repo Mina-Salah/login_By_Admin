@@ -1,0 +1,17 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WebApplication3.Models
+{
+    public class Teacher
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
+        // Navigation Property
+        public ICollection<Student> Students { get; set; }
+        public ICollection<Course> Courses { get; set; }
+
+    }
+}
