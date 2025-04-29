@@ -21,26 +21,29 @@ namespace WebApplication3.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure One-to-Many Relationship
+            // علاقات موجودة لديك
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.Teacher)
                 .WithMany(t => t.Students)
                 .HasForeignKey(s => s.TeacherId);
 
             modelBuilder.Entity<StudentCourse>()
-      .HasKey(sc => new { sc.StudentId, sc.CourseId });
+                .HasKey(sc => new { sc.StudentId, sc.CourseId });
 
             modelBuilder.Entity<StudentCourse>()
                 .HasOne(sc => sc.Student)
                 .WithMany(s => s.StudentCourses)
                 .HasForeignKey(sc => sc.StudentId)
-                .OnDelete(DeleteBehavior.NoAction);  // منع الـ Cascade في حالة الحذف.
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<StudentCourse>()
                 .HasOne(sc => sc.Course)
                 .WithMany(c => c.StudentCourses)
                 .HasForeignKey(sc => sc.CourseId)
-                .OnDelete(DeleteBehavior.NoAction);  // منع الـ Cascade في حالة الحذف.
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ✅ فلتر يمنع عرض الـ Teachers المحذوفين
+            modelBuilder.Entity<Teacher>().HasQueryFilter(t => !t.IsDeleted);
         }
     }
 }

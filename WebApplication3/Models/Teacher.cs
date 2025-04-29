@@ -8,6 +8,8 @@ namespace WebApplication3.Models
 
         [Required]
         public string Name { get; set; }
+        public bool IsDeleted { get; set; } = false;
+
 
         // Navigation Property
         public ICollection<Student> Students { get; set; }

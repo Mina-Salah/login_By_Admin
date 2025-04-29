@@ -39,7 +39,8 @@ namespace WebApplication3.Services
             var teacher = await _teacherRepository.GetByIdAsync(id);
             if (teacher != null)
             {
-                _teacherRepository.Delete(teacher);
+                teacher.IsDeleted = true;
+                _teacherRepository.Update(teacher);
                 await _teacherRepository.SaveAsync();
             }
         }

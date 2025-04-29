@@ -8,6 +8,7 @@ namespace WebApplication3.Models
 
         [Required]
         public string Name { get; set; }
+        public bool IsDeleted { get; set; }
 
         // Foreign Key
         public int TeacherId { get; set; }
