@@ -22,11 +22,11 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="CourseId" class="control-label">Course</label>
-        <select asp-for="CourseId" asp-items="Model.Courses" class="form-control">
-            <option value="">-- Select Course --</option>
+        <label asp-for="CourseIds" class="control-label">Courses</label>
+        <select asp-for="CourseIds" asp-items="Model.Courses" class="form-control" multiple>
+            <option value="">-- Select Courses --</option>
         </select>
-        <span asp-validation-for="CourseId" class="text-danger"></span>
+        <span asp-validation-for="CourseIds" class="text-danger"></span>
     </div>
 
     <div class="form-group">
@@ -34,6 +34,7 @@
         <a asp-action="Index" class="btn btn-secondary">Back to List</a>
     </div>
 </form>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

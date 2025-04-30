@@ -1,102 +1,106 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using WebApplication3.Models;
 using WebApplication3.Services;
 using WebApplication3.ViewModels;
+using WebApplication3.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace WebApplication3.Controllers
 {
-    [Authorize] // السماح فقط للمستخدمين المسجلين بالدخول
     public class CourseController : Controller
     {
         private readonly ICourseService _courseService;
+        private readonly ITeacherService _teacherService;
         private readonly IMapper _mapper;
 
-        public CourseController(ICourseService courseService, IMapper mapper)
+        public CourseController(ICourseService courseService, ITeacherService teacherService, IMapper mapper)
         {
             _courseService = courseService;
+            _teacherService = teacherService;
             _mapper = mapper;
         }
 
         public async Task<IActionResult> Index()
         {
-            var courses = await _courseService.GetCoursesWithTeacherAsync();
-            var viewModel = _mapper.Map<IEnumerable<CourseViewModel>>(courses);
-            return View(viewModel);
+            var courses = await _courseService.GetAllAsync();
+            var viewModels = _mapper.Map<List<CourseViewModel>>(courses);
+            return View(viewModels);
         }
 
-        private async Task<IEnumerable<SelectListItem>> GetTeachersSelectListAsync()
-        {
-            var teachers = await _courseService.GetAllTeachersAsync();
-            return teachers.Select(t => new SelectListItem
-            {
-                Value = t.Id.ToString(),
-                Text = t.Name ?? "غير محدد"
-            });
-        }
-
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
-            var vm = new CourseViewModel
+            var teachers = await _teacherService.GetAllTeachersAsync();
+            ViewBag.Teachers = teachers.Select(t => new SelectListItem
             {
-                TeachersList = await GetTeachersSelectListAsync()
-            };
-            return View(vm);
+                Value = t.Id.ToString(),
+                Text = t.Name
+            }).ToList();
+
+            return View();
         }
+
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CourseViewModel vm)
+        public async Task<IActionResult> Create(CourseViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var course = _mapper.Map<Course>(vm);
-                await _courseService.AddAsync(course);
-                return RedirectToAction(nameof(Index));
+                var teachers = await _teacherService.GetAllTeachersAsync();
+                ViewBag.Teachers = teachers.Select(t => new SelectListItem
+                {
+                    Value = t.Id.ToString(),
+                    Text = t.Name
+                }).ToList();
+
+                return View(model);
             }
 
-            vm.TeachersList = await GetTeachersSelectListAsync();
-            return View(vm);
+            var course = _mapper.Map<Course>(model);
+            await _courseService.AddAsync(course);
+            return RedirectToAction(nameof(Index));
         }
 
-        [Authorize(Roles = "Admin")]
+
         public async Task<IActionResult> Edit(int id)
         {
             var course = await _courseService.GetByIdAsync(id);
-            if (course == null)
-                return NotFound();
+            if (course == null) return NotFound();
 
-            var vm = _mapper.Map<CourseViewModel>(course);
-            vm.TeachersList = await GetTeachersSelectListAsync();
-            return View(vm);
+            var viewModel = _mapper.Map<CourseViewModel>(course);
+            ViewBag.Teachers = await _teacherService.GetAllTeachersAsync();
+            return View(viewModel);
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, CourseViewModel vm)
+        public async Task<IActionResult> Edit(int id, CourseViewModel model)
         {
-            if (id != vm.Id)
-                return BadRequest();
+            if (id != model.Id) return NotFound();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var course = _mapper.Map<Course>(vm);
-                await _courseService.UpdateAsync(course);
-                return RedirectToAction(nameof(Index));
+                ViewBag.Teachers = await _teacherService.GetAllTeachersAsync();
+                return View(model);
             }
 
-            vm.TeachersList = await GetTeachersSelectListAsync();
-            return View(vm);
+            var course = _mapper.Map<Course>(model);
+            await _courseService.UpdateAsync(course);
+            return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
+        {
+            var course = await _courseService.GetByIdAsync(id);
+            if (course == null) return NotFound();
+
+            var viewModel = _mapper.Map<CourseViewModel>(course);
+            return View(viewModel);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _courseService.DeleteAsync(id);
             return RedirectToAction(nameof(Index));

@@ -29,8 +29,10 @@ namespace WebApplication3.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
-            return View();
+            var model = new TeacherViewModel();
+            return View(model);
         }
+
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
@@ -42,7 +44,7 @@ namespace WebApplication3.Controllers
 
             var teacher = _mapper.Map<Teacher>(model);
             await _teacherService.AddTeacherAsync(teacher);
-
+            TempData["Success"] = "تم إضافة المعلم بنجاح";
             return RedirectToAction(nameof(Index));
         }
 
@@ -66,7 +68,7 @@ namespace WebApplication3.Controllers
 
             var teacher = _mapper.Map<Teacher>(model);
             await _teacherService.UpdateTeacherAsync(teacher);
-
+            TempData["Success"] = "تم تعديل بيانات المعلم";
             return RedirectToAction(nameof(Index));
         }
 
@@ -76,6 +78,7 @@ namespace WebApplication3.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             await _teacherService.DeleteTeacherAsync(id);
+            TempData["Success"] = "تم حذف المعلم";
             return RedirectToAction(nameof(Index));
         }
 
@@ -84,7 +87,7 @@ namespace WebApplication3.Controllers
         {
             var deletedTeachers = await _teacherService.GetDeletedTeachersAsync();
             var model = _mapper.Map<List<TeacherViewModel>>(deletedTeachers);
-            return View(model); // ممكن تستخدم View جديدة أو نفس View Index
+            return View("Deleted", model); // View مخصص للـ Deleted Teachers
         }
 
         [HttpPost]
@@ -93,9 +96,8 @@ namespace WebApplication3.Controllers
         public async Task<IActionResult> Restore(int id)
         {
             await _teacherService.RestoreTeacherAsync(id);
+            TempData["Success"] = "تم استرجاع المعلم بنجاح";
             return RedirectToAction(nameof(Deleted));
         }
-
-
     }
 }

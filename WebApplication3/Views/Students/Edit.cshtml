@@ -4,10 +4,7 @@
     ViewData["Title"] = "Edit Student";
 }
 
-<h1>Edit Student</h1>
-
-<h4>Student</h4>
-<hr />
+<h2>Edit Student</h2>
 
 <form asp-action="Edit" method="post">
     <div class="form-group">
@@ -17,11 +14,29 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="TeacherId" class="control-label"></label>
-        <select asp-for="TeacherId" class="form-control" asp-items="Model.Teachers"></select>
+        <label asp-for="TeacherId" class="control-label">Teacher</label>
+        <select asp-for="TeacherId" asp-items="Model.Teachers" class="form-control">
+            <option value="">-- Select Teacher --</option>
+        </select>
         <span asp-validation-for="TeacherId" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a href="@Url.Action("Index")" class="btn btn-secondary">Back to List</a>
+    <div class="form-group">
+        <label asp-for="CourseIds" class="control-label">Courses</label>
+        <select asp-for="CourseIds" asp-items="Model.Courses" class="form-control" multiple>
+            <option value="">-- Select Courses --</option>
+        </select>
+        <span asp-validation-for="CourseIds" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="@Url.Action("Index")" class="btn btn-secondary">Back to List</a>
+    </div>
 </form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

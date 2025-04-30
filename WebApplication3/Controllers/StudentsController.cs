@@ -1,143 +1,174 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using WebApplication3.Models;
-using WebApplication3.Repositories;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using WebApplication3.Services;
 using WebApplication3.ViewModels;
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
+using WebApplication3.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace WebApplication3.Controllers
 {
-    [Authorize]
+    // Restricting access to the entire controller for users with "Admin" role
+    [Authorize(Roles = "Admin")] 
     public class StudentsController : Controller
     {
         private readonly IStudentService _studentService;
-        private readonly IGenericRepository<Teacher> _teacherRepository;
+        private readonly ITeacherService _teacherService;
+        private readonly ICourseService _courseService;
         private readonly IMapper _mapper;
 
         public StudentsController(
             IStudentService studentService,
-            IGenericRepository<Teacher> teacherRepository,
+            ITeacherService teacherService,
+            ICourseService courseService,
             IMapper mapper)
         {
             _studentService = studentService;
-            _teacherRepository = teacherRepository;
+            _teacherService = teacherService;
+            _courseService = courseService;
             _mapper = mapper;
         }
 
+        // Action to display all students (accessible by any logged-in user)
         public async Task<IActionResult> Index()
         {
-            var students = await _studentService.GetAllStudentsAsync(
-                includes: query => query.Include(s => s.Teacher)
-                .Include(s => s.Course)
-            );
-
-            var studentViewModels = _mapper.Map<List<StudentViewModel>>(students);
-            return View(studentViewModels);
+            var students = await _studentService.GetAllAsync();
+            var viewModels = _mapper.Map<List<StudentViewModel>>(students);
+            return View(viewModels);
         }
-
+        // Action to show the student creation page (only accessible by "Admin" users)
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
-            var model = new StudentViewModel
-            {
-                Teachers = await GetTeachersSelectListAsync()
-            };
-            return View(model);
-        }
+            var teachers = await _teacherService.GetAllTeachersAsync();
+            var courses = await _courseService.GetAllAsync();
 
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(StudentViewModel studentViewModel)
-        {
-            if (ModelState.IsValid)
-            {
-                var student = _mapper.Map<Student>(studentViewModel);
-                await _studentService.AddStudentAsync(student);
-                return RedirectToAction(nameof(Index));
-            }
-
-            studentViewModel.Teachers = await GetTeachersSelectListAsync();
-            return View(studentViewModel);
-        }
-
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-                return NotFound();
-
-            var student = await _studentService.GetStudentByIdAsync(
-                id.Value,
-                includes: query => query.Include(s => s.Teacher)
-            );
-
-            if (student == null)
-                return NotFound();
-
-            var model = _mapper.Map<StudentViewModel>(student);
-            model.Teachers = await GetTeachersSelectListAsync();
-
-            return View(model);
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, StudentViewModel studentViewModel)
-        {
-            if (id != studentViewModel.Id)
-                return NotFound();
-
-            if (ModelState.IsValid)
-            {
-                var student = _mapper.Map<Student>(studentViewModel);
-                await _studentService.UpdateStudentAsync(student);
-                return RedirectToAction(nameof(Index));
-            }
-
-            studentViewModel.Teachers = await GetTeachersSelectListAsync();
-            return View(studentViewModel);
-        }
-
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-                return NotFound();
-
-            var student = await _studentService.GetStudentByIdAsync(
-                id.Value,
-                includes: query => query.Include(s => s.Teacher)
-            );
-
-            if (student == null)
-                return NotFound();
-
-            var studentViewModel = _mapper.Map<StudentViewModel>(student);
-            return View(studentViewModel);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [Authorize(Roles = "Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            await _studentService.DeleteStudentAsync(id);
-            return RedirectToAction(nameof(Index));
-        }
-
-        private async Task<IEnumerable<SelectListItem>> GetTeachersSelectListAsync()
-        {
-            var teachers = await _teacherRepository.GetAllAsync();
-            return teachers.Select(t => new SelectListItem
+            ViewBag.Teachers = teachers.Select(t => new SelectListItem
             {
                 Value = t.Id.ToString(),
                 Text = t.Name
-            });
+            }).ToList();
+
+            ViewBag.Courses = courses.Select(c => new SelectListItem
+            {
+                Value = c.Id.ToString(),
+                Text = c.Name
+            }).ToList();
+
+            return View();
+        }
+
+        // Action to handle the creation of a new student (only accessible by "Admin" users)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create(StudentViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var teachers = await _teacherService.GetAllTeachersAsync();
+                var courses = await _courseService.GetAllAsync();
+
+                // Re-populate the teachers and courses in case of input errors
+                ViewBag.Teachers = teachers.Select(t => new SelectListItem
+                {
+                    Value = t.Id.ToString(),
+                    Text = t.Name
+                }).ToList();
+
+                ViewBag.Courses = courses.Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                }).ToList();
+
+                return View(model);
+            }
+
+            var student = _mapper.Map<Student>(model);
+            await _studentService.AddAsync(student, model.CourseIds); // Add the student with associated courses
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Action to show the student edit page (only accessible by "Admin" users)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var student = await _studentService.GetByIdAsync(id);
+            if (student == null) return NotFound();
+
+            var viewModel = _mapper.Map<StudentViewModel>(student);
+            var teachers = await _teacherService.GetAllTeachersAsync();
+            var courses = await _courseService.GetAllAsync();
+
+            ViewBag.Teachers = teachers.Select(t => new SelectListItem
+            {
+                Value = t.Id.ToString(),
+                Text = t.Name
+            }).ToList();
+
+            ViewBag.Courses = courses.Select(c => new SelectListItem
+            {
+                Value = c.Id.ToString(),
+                Text = c.Name
+            }).ToList();
+
+            return View(viewModel);
+        }
+
+        // Action to handle student updates (only accessible by "Admin" users)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id, StudentViewModel model)
+        {
+            if (id != model.Id) return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                var teachers = await _teacherService.GetAllTeachersAsync();
+                var courses = await _courseService.GetAllAsync();
+
+                // Re-populate the teachers and courses in case of input errors
+                ViewBag.Teachers = teachers.Select(t => new SelectListItem
+                {
+                    Value = t.Id.ToString(),
+                    Text = t.Name
+                }).ToList();
+
+                ViewBag.Courses = courses.Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                }).ToList();
+
+                return View(model);
+            }
+
+            var student = _mapper.Map<Student>(model);
+            await _studentService.UpdateAsync(student, model.CourseIds); // Update the student and associated courses
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Action to show the delete confirmation page (only accessible by "Admin" users)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var student = await _studentService.GetByIdAsync(id);
+            if (student == null) return NotFound();
+
+            var viewModel = _mapper.Map<StudentViewModel>(student);
+            return View(viewModel);
+        }
+
+        // Action to confirm the deletion of a student (only accessible by "Admin" users)
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            await _studentService.DeleteAsync(id); // Delete the student
+            return RedirectToAction(nameof(Index));
         }
     }
 }

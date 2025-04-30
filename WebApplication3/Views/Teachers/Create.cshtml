@@ -1,18 +1,22 @@
 ﻿@model WebApplication3.ViewModels.TeacherViewModel
 
-<h2>إضافة معلم</h2>
-
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-success">حفظ</button>
-    <a asp-action="Index" class="btn btn-secondary">رجوع</a>
-</form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+@{
+    ViewData["Title"] = "Add New Teacher";
 }
+
+<div class="container mt-4">
+    <h2>@ViewData["Title"]</h2>
+
+    <form asp-action="Create" method="post" class="needs-validation" novalidate>
+        <div class="mb-3">
+            <label for="Name" class="form-label">Teacher Name</label>
+            <input type="text" class="form-control" id="Name" name="Name" value="@Model.Name" required>
+            <div class="invalid-feedback">
+                Please provide a valid name.
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Teacher</button>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </form>
+</div>

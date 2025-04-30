@@ -1,45 +1,92 @@
-﻿using WebApplication3.Models;
-using WebApplication3.Repositories;
-using WebApplication3.Services;
+﻿using Microsoft.EntityFrameworkCore;
+using WebApplication3.Data;
+using WebApplication3.Models;
+using System.Linq;
 
-public class StudentService : IStudentService
+namespace WebApplication3.Services
 {
-    private readonly IGenericRepository<Student> _studentRepository;
-
-    public StudentService(IGenericRepository<Student> studentRepository)
+    public class StudentService : IStudentService
     {
-        _studentRepository = studentRepository;
-    }
+        private readonly SchoolContext _context;
 
-    public async Task<IEnumerable<Student>> GetAllStudentsAsync(Func<IQueryable<Student>, IQueryable<Student>>? includes = null)
-    {
-        return await _studentRepository.GetAllAsync(includes);
-    }
-
-    public async Task<Student?> GetStudentByIdAsync(int id, Func<IQueryable<Student>, IQueryable<Student>>? includes = null)
-    {
-        return await _studentRepository.GetByIdAsync(id, includes);
-    }
-
-    public async Task AddStudentAsync(Student student)
-    {
-        await _studentRepository.AddAsync(student);
-        await _studentRepository.SaveAsync();
-    }
-
-    public async Task UpdateStudentAsync(Student student)
-    {
-        _studentRepository.Update(student);
-        await _studentRepository.SaveAsync();
-    }
-
-    public async Task DeleteStudentAsync(int id)
-    {
-        var student = await _studentRepository.GetByIdAsync(id);
-        if (student != null)
+        public StudentService(SchoolContext context)
         {
-            _studentRepository.Delete(student);
-            await _studentRepository.SaveAsync();
+            _context = context;
+        }
+
+        // الحصول على كل الطلاب مع المدرسين والدورات
+        public async Task<List<Student>> GetAllAsync()
+        {
+            return await _context.Students
+                .Include(s => s.Teacher)
+                .Include(s => s.StudentCourses)
+                    .ThenInclude(sc => sc.Course)
+                .Where(s => !s.IsDeleted)
+                .ToListAsync();
+        }
+
+        // الحصول على طالب واحد بالمعرف مع المدرس والدورات
+        public async Task<Student> GetByIdAsync(int id)
+        {
+            return await _context.Students
+                .Include(s => s.Teacher)
+                .Include(s => s.StudentCourses)
+                    .ThenInclude(sc => sc.Course)
+                .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
+        }
+
+        // إضافة طالب جديد مع ربطه بالدورات
+        public async Task AddAsync(Student student, List<int> courseIds)
+        {
+            _context.Students.Add(student);
+
+            foreach (var courseId in courseIds)
+            {
+                var studentCourse = new StudentCourse
+                {
+                    StudentId = student.Id,
+                    CourseId = courseId
+                };
+                _context.StudentCourses.Add(studentCourse);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        // تحديث طالب مع ربطه بالدورات
+        public async Task UpdateAsync(Student student, List<int> courseIds)
+        {
+            _context.Students.Update(student);
+
+            // حذف الدورات القديمة المربوطة بالطالب
+            var existingStudentCourses = _context.StudentCourses
+                .Where(sc => sc.StudentId == student.Id)
+                .ToList();
+            _context.StudentCourses.RemoveRange(existingStudentCourses);
+
+            // إضافة الدورات الجديدة
+            foreach (var courseId in courseIds)
+            {
+                var studentCourse = new StudentCourse
+                {
+                    StudentId = student.Id,
+                    CourseId = courseId
+                };
+                _context.StudentCourses.Add(studentCourse);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        // حذف طالب
+        public async Task DeleteAsync(int id)
+        {
+            var student = await _context.Students.FindAsync(id);
+            if (student != null)
+            {
+                student.IsDeleted = true;
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

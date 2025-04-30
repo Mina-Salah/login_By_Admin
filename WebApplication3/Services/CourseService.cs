@@ -1,69 +1,56 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using WebApplication3.Data;
 using WebApplication3.Models;
-using WebApplication3.Repositories;
-using WebApplication3.Services;
 
-public class CourseService : ICourseService
+namespace WebApplication3.Services
 {
-    private readonly IGenericRepository<Course> _courseRepository;
-    private readonly IGenericRepository<Teacher> _teacherRepository;
-
-    public CourseService(IGenericRepository<Course> courseRepository, IGenericRepository<Teacher> teacherRepository)
+    public class CourseService : ICourseService
     {
-        _courseRepository = courseRepository;
-        _teacherRepository = teacherRepository;
-    }
+        private readonly SchoolContext _context;
 
-    public async Task<IEnumerable<Course>> GetAllAsync()
-    {
-        return await _courseRepository.GetAllAsync();
-    }
-
-    public async Task<Course?> GetByIdAsync(int id)
-    {
-        return await _courseRepository.GetByIdAsync(id);
-    }
-
-    public async Task AddAsync(Course course)
-    {
-        await _courseRepository.AddAsync(course);
-        await _courseRepository.SaveAsync();
-    }
-
-    public async Task UpdateAsync(Course course)
-    {
-        _courseRepository.Update(course);
-        await _courseRepository.SaveAsync();
-    }
-
-    public async Task DeleteAsync(int id)
-    {
-        var course = await _courseRepository.GetByIdAsync(id);
-        if (course != null)
+        public CourseService(SchoolContext context)
         {
-            _courseRepository.Delete(course);
-            await _courseRepository.SaveAsync();
+            _context = context;
         }
-    }
 
-    public async Task<IEnumerable<Course>> GetCoursesWithTeacherAsync()
-    {
-        return await _courseRepository.GetAllAsync(query => query.Include(c => c.Teacher));
-    }
-
-    public async Task<Course?> GetCourseWithStudentsAsync(int id)
-    {
-        return await _courseRepository.GetByIdAsync(id, query =>
-            query
+        public async Task<List<Course>> GetAllAsync()
+        {
+            return await _context.Courses
                 .Include(c => c.Teacher)
                 .Include(c => c.StudentCourses)
-                    .ThenInclude(sc => sc.Student));
+                .Where(c => !c.IsDeleted)
+                .ToListAsync();
+        }
+
+        public async Task<Course> GetByIdAsync(int id)
+        {
+            return await _context.Courses
+                .Include(c => c.Teacher)
+                .Include(c => c.StudentCourses)
+                .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
+        }
+
+        public async Task AddAsync(Course course)
+        {
+            _context.Courses.Add(course);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(Course course)
+        {
+            _context.Courses.Update(course);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var course = await _context.Courses.FindAsync(id);
+            if (course != null)
+            {
+                course.IsDeleted = true;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
-
-    public async Task<IEnumerable<Teacher>> GetAllTeachersAsync()
-    {
-        return await _teacherRepository.GetAllAsync();
-    }
-
-
 }

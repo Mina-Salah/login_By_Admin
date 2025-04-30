@@ -1,13 +1,13 @@
 ﻿using WebApplication3.Models;
-    namespace WebApplication3.Services
-    {
+
+namespace WebApplication3.Services
+{
     public interface IStudentService
     {
-        Task<IEnumerable<Student>> GetAllStudentsAsync(Func<IQueryable<Student>, IQueryable<Student>>? includes = null);
-        Task<Student?> GetStudentByIdAsync(int id, Func<IQueryable<Student>, IQueryable<Student>>? includes = null);
-        Task AddStudentAsync(Student student);
-        Task UpdateStudentAsync(Student student);
-        Task DeleteStudentAsync(int id);
+        Task<List<Student>> GetAllAsync();
+        Task<Student> GetByIdAsync(int id);
+        Task AddAsync(Student student, List<int> courseIds); // تم إضافة List<int> courseIds
+        Task UpdateAsync(Student student, List<int> courseIds); // تم إضافة List<int> courseIds
+        Task DeleteAsync(int id);
     }
-
 }

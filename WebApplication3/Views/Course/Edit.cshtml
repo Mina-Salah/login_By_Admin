@@ -1,10 +1,12 @@
 ﻿@model WebApplication3.ViewModels.CourseViewModel
 
-<h2>Edit Course</h2>
+@{
+    ViewData["Title"] = "Edit Course";
+}
+
+<h1>@ViewData["Title"]</h1>
 
 <form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
-
     <div class="form-group">
         <label asp-for="Name" class="control-label"></label>
         <input asp-for="Name" class="form-control" />
@@ -13,12 +15,18 @@
 
     <div class="form-group">
         <label asp-for="TeacherId" class="control-label">Teacher</label>
-        <select asp-for="TeacherId" class="form-control" asp-items="Model.TeachersList">
+        <select asp-for="TeacherId" class="form-control" asp-items="ViewBag.Teachers">
             <option value="">-- Select Teacher --</option>
         </select>
         <span asp-validation-for="TeacherId" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-2">Save Changes</button>
-    <a asp-action="Index" class="btn btn-secondary mt-2">Cancel</a>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Back to List</a>
 </form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

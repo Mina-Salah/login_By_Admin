@@ -21,28 +21,21 @@ namespace WebApplication3.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // علاقة واحد إلى متعدد بين Teacher و Student
+            // علاقة One-to-Many بين Teacher و Student
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.Teacher)
                 .WithMany(t => t.Students)
                 .HasForeignKey(s => s.TeacherId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Student>()
-           .HasOne(s => s.Course)  // علاقة طالب مع كورس واحد
-           .WithMany()  // يمكن أن يكون لدى الكورس العديد من الطلاب
-           .HasForeignKey(s => s.CourseId)  // تحديد المفتاح الأجنبي
-           .OnDelete(DeleteBehavior.Restrict);  // تأكد من عدم حذف الكورس إذا كان هناك طلاب مرتبطين
-
-
-            // علاقة واحد إلى متعدد بين Teacher و Course
+            // علاقة One-to-Many بين Teacher و Course
             modelBuilder.Entity<Course>()
                 .HasOne(c => c.Teacher)
                 .WithMany(t => t.Courses)
                 .HasForeignKey(c => c.TeacherId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // علاقة متعدد إلى متعدد بين Student و Course باستخدام StudentCourse
+            // علاقة Many-to-Many بين Student و Course
             modelBuilder.Entity<StudentCourse>()
                 .HasKey(sc => new { sc.StudentId, sc.CourseId });
 
