@@ -14,7 +14,8 @@ namespace WebApplication3.Services
 
         public async Task<IEnumerable<Teacher>> GetAllTeachersAsync()
         {
-            return await _teacherRepository.GetAllAsync();
+            return await _teacherRepository.GetAllAsync(
+                query => query.Where(t => !t.IsDeleted));
         }
 
         public async Task<Teacher> GetTeacherByIdAsync(int id)
@@ -44,5 +45,20 @@ namespace WebApplication3.Services
                 await _teacherRepository.SaveAsync();
             }
         }
+        public async Task RestoreTeacherAsync(int id)
+        {
+            var teacher = await _teacherRepository.GetByIdAsync(id);
+            if (teacher != null && teacher.IsDeleted)
+            {
+                teacher.IsDeleted = false;
+                _teacherRepository.Update(teacher);
+                await _teacherRepository.SaveAsync();
+            }
+        }
+        public async Task<IEnumerable<Teacher>> GetDeletedTeachersAsync()
+        {
+            return await _teacherRepository.GetAllAsync(q => q.Where(t => t.IsDeleted));
+        }
+
     }
 }

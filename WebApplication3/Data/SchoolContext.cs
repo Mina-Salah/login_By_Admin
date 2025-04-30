@@ -21,12 +21,21 @@ namespace WebApplication3.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // علاقات موجودة لديك
+            // علاقة واحد إلى متعدد بين Teacher و Student
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.Teacher)
                 .WithMany(t => t.Students)
-                .HasForeignKey(s => s.TeacherId);
+                .HasForeignKey(s => s.TeacherId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            // علاقة واحد إلى متعدد بين Teacher و Course
+            modelBuilder.Entity<Course>()
+                .HasOne(c => c.Teacher)
+                .WithMany(t => t.Courses)
+                .HasForeignKey(c => c.TeacherId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // علاقة متعدد إلى متعدد بين Student و Course باستخدام StudentCourse
             modelBuilder.Entity<StudentCourse>()
                 .HasKey(sc => new { sc.StudentId, sc.CourseId });
 
@@ -41,9 +50,7 @@ namespace WebApplication3.Data
                 .WithMany(c => c.StudentCourses)
                 .HasForeignKey(sc => sc.CourseId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // ✅ فلتر يمنع عرض الـ Teachers المحذوفين
-            modelBuilder.Entity<Teacher>().HasQueryFilter(t => !t.IsDeleted);
         }
+
     }
 }

@@ -78,5 +78,24 @@ namespace WebApplication3.Controllers
             await _teacherService.DeleteTeacherAsync(id);
             return RedirectToAction(nameof(Index));
         }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Deleted()
+        {
+            var deletedTeachers = await _teacherService.GetDeletedTeachersAsync();
+            var model = _mapper.Map<List<TeacherViewModel>>(deletedTeachers);
+            return View(model); // ممكن تستخدم View جديدة أو نفس View Index
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
+        {
+            await _teacherService.RestoreTeacherAsync(id);
+            return RedirectToAction(nameof(Deleted));
+        }
+
+
     }
 }

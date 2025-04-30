@@ -1,9 +1,13 @@
-﻿<!DOCTYPE html>
+﻿@{
+    ViewData["Title"] = "School Management System";
+}
+
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - School Management System</title>
+    <title>@ViewData["Title"]</title>
 
     <!-- Bootstrap CSS (Local) -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -13,39 +17,51 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/WebApplication3.styles.css" asp-append-version="true" />
 </head>
 <body>
     <!-- Navbar -->
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">School Management</a>
+                <a class="navbar-brand" asp-controller="Auth" asp-action="Welcome">
+                    <i class="bi bi-house-door-fill"></i> School Management
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                      
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Teachers" asp-action="Index">Teachers</a>
+                            <a class="nav-link text-white" asp-controller="Teachers" asp-action="Index">
+                                <i class="bi bi-person-lines-fill"></i> Teachers
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Course" asp-action="Index">Courses</a>
+                            <a class="nav-link text-white" asp-controller="Course" asp-action="Index">
+                                <i class="bi bi-book-fill"></i> Courses
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Students" asp-action="Index">Students</a>
+                            <a class="nav-link text-white" asp-controller="Students" asp-action="Index">
+                                <i class="bi bi-person-bounding-box"></i> Students
+                            </a>
                         </li>
                     </ul>
-                    <form method="post" action="@Url.Action("Logout", "Auth")">
-                        <button type="submit" class="btn btn-danger">Logout</button>
-                    </form>
+                    <div class="d-flex">
+                        <span class="navbar-text text-white me-3">
+                            Welcome, @User.Identity.Name
+                        </span>
+                        <form method="post" action="@Url.Action("Logout", "Auth")" class="d-inline">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </nav>
     </header>
-
 
     <div class="container">
         <main role="main" class="pb-3">

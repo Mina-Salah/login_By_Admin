@@ -9,5 +9,9 @@ namespace WebApplication3.Services
         Task AddTeacherAsync(Teacher teacher);
         Task UpdateTeacherAsync(Teacher teacher);
         Task DeleteTeacherAsync(int id);
+
+        Task<IEnumerable<Teacher>> GetDeletedTeachersAsync();
+        Task RestoreTeacherAsync(int id);
+
     }
 }
