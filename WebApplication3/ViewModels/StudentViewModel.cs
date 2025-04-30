@@ -14,8 +14,12 @@ namespace WebApplication3.ViewModels
         public int TeacherId { get; set; }
 
         public string? TeacherName { get; set; }
+        public int CourseId { get; set; }
+
+        public string? courseName { get; set; }
 
         // عشان نعرض DropDownList
         public IEnumerable<SelectListItem>? Teachers { get; set; }
+        public IEnumerable<SelectListItem>? Courses { get; set; }
     }
 }

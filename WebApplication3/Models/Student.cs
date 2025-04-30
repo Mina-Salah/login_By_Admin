@@ -10,11 +10,14 @@ namespace WebApplication3.Models
         public string Name { get; set; }
         public bool IsDeleted { get; set; }
 
-        // Foreign Key
+        // Navigation Property
         public int TeacherId { get; set; }
+        public Teacher Teacher { get; set; }
 
         // Navigation Property
-        public Teacher Teacher { get; set; }
+        public int CourseId { get; set; } 
+        public Course Course { get; set; } 
+
 
         public ICollection<StudentCourse> StudentCourses { get; set; }
 

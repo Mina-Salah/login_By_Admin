@@ -28,6 +28,13 @@ namespace WebApplication3.Data
                 .HasForeignKey(s => s.TeacherId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Student>()
+           .HasOne(s => s.Course)  // علاقة طالب مع كورس واحد
+           .WithMany()  // يمكن أن يكون لدى الكورس العديد من الطلاب
+           .HasForeignKey(s => s.CourseId)  // تحديد المفتاح الأجنبي
+           .OnDelete(DeleteBehavior.Restrict);  // تأكد من عدم حذف الكورس إذا كان هناك طلاب مرتبطين
+
+
             // علاقة واحد إلى متعدد بين Teacher و Course
             modelBuilder.Entity<Course>()
                 .HasOne(c => c.Teacher)

@@ -31,6 +31,7 @@ namespace WebApplication3.Controllers
         {
             var students = await _studentService.GetAllStudentsAsync(
                 includes: query => query.Include(s => s.Teacher)
+                .Include(s => s.Course)
             );
 
             var studentViewModels = _mapper.Map<List<StudentViewModel>>(students);
