@@ -12,8 +12,7 @@ namespace WebApplication3.Models
 
 
         // Navigation Property
-        public ICollection<Student> Students { get; set; }
         public ICollection<Course> Courses { get; set; }
-
+        public ICollection<Student> Students { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
 using WebApplication3.Data;
 using WebApplication3.Models;
 
@@ -14,41 +13,45 @@ namespace WebApplication3.Services
             _context = context;
         }
 
-        public async Task<List<Course>> GetAllAsync()
+        // إحضار كل الكورسات
+        public async Task<List<Course>> GetAllCoursesAsync()
         {
             return await _context.Courses
-                .Include(c => c.Teacher)
-                .Include(c => c.StudentCourses)
-                .Where(c => !c.IsDeleted)
-                .ToListAsync();
+                                 .Include(c => c.Teacher)  // ربط المعلم مع الكورس
+                                 .Where(c => !c.IsDeleted)  // استبعاد الكورسات المحذوفة
+                                 .ToListAsync();
         }
 
-        public async Task<Course> GetByIdAsync(int id)
+        // إحضار كورس حسب الـ ID
+        public async Task<Course?> GetCourseByIdAsync(int id)
         {
             return await _context.Courses
-                .Include(c => c.Teacher)
-                .Include(c => c.StudentCourses)
-                .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);
+                                 .Include(c => c.Teacher)  // ربط المعلم مع الكورس
+                                 .FirstOrDefaultAsync(c => c.Id == id && !c.IsDeleted);  // إحضار الكورس غير المحذوف
         }
 
-        public async Task AddAsync(Course course)
+        // إضافة كورس
+        public async Task AddCourseAsync(Course course)
         {
-            _context.Courses.Add(course);
+            await _context.Courses.AddAsync(course);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Course course)
+        // تعديل كورس
+        public async Task UpdateCourseAsync(Course course)
         {
             _context.Courses.Update(course);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        // حذف كورس (Soft Delete)
+        public async Task DeleteCourseAsync(int id)
         {
             var course = await _context.Courses.FindAsync(id);
             if (course != null)
             {
-                course.IsDeleted = true;
+                course.IsDeleted = true;  // تعيين الكورس كـ "محذوف"
+                _context.Courses.Update(course);
                 await _context.SaveChangesAsync();
             }
         }

@@ -10,10 +10,10 @@ namespace WebApplication3.Models
         public string Name { get; set; }
         public bool IsDeleted { get; set; }
 
-        public int TeacherId { get; set; }
-        public Teacher Teacher { get; set; }
-
-        public ICollection<StudentCourse> StudentCourses { get; set; }
+        public int CourseId { get; set; }
+        public Course Course { get; set; } 
+        public int? TeacherId { get; set; }
+        public Teacher? Teacher { get; set; }
     }
 
 }

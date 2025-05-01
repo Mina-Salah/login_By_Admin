@@ -20,6 +20,7 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IDeletedDataService, DeletedDataService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // AutoMapper

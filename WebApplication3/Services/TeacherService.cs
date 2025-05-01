@@ -66,5 +66,38 @@ namespace WebApplication3.Services
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task DeleteTeacherPermanentlyAsync(int id)
+        {
+            var teacher = await _context.Teachers.FindAsync(id);
+            if (teacher != null)
+            {
+                _context.Teachers.Remove(teacher);
+                await _context.SaveChangesAsync();
+            }
+        }
+        public async Task<string> DeleteTeacherPermanentlyWithMessageAsync(int id)
+        {
+            var teacher = await _context.Teachers.FindAsync(id);
+            if (teacher != null)
+            {
+                // تحقق من ارتباط المدرس بكورسات
+                var courses = await _context.Courses
+                    .Where(c => c.TeacherId == teacher.Id)
+                    .ToListAsync();
+
+                if (courses.Any())
+                {
+                    // إذا كان مرتبطًا بكورسات، إرجاع رسالة
+                    return "المدرس مرتبط بكورسات ولا يمكن حذفه نهائيًا.";
+                }
+
+                // إذا لم يكن هناك ارتباط بكورسات، يتم الحذف النهائي
+                _context.Teachers.Remove(teacher);
+                await _context.SaveChangesAsync();
+                return "تم حذف المعلم نهائيًا بنجاح";
+            }
+
+            return "المدرس غير موجود.";
+        }
     }
 }

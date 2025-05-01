@@ -4,10 +4,10 @@ namespace WebApplication3.Services
 {
     public interface ICourseService
     {
-        Task<List<Course>> GetAllAsync();
-        Task<Course> GetByIdAsync(int id);
-        Task AddAsync(Course course);
-        Task UpdateAsync(Course course);
-        Task DeleteAsync(int id);
+        Task<List<Course>> GetAllCoursesAsync();
+        Task<Course?> GetCourseByIdAsync(int id);
+        Task AddCourseAsync(Course course);
+        Task UpdateCourseAsync(Course course);
+        Task DeleteCourseAsync(int id);
     }
 }

@@ -99,5 +99,30 @@ namespace WebApplication3.Controllers
             TempData["Success"] = "تم استرجاع المعلم بنجاح";
             return RedirectToAction(nameof(Deleted));
         }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePermanently(int id)
+        {
+            // استدعاء خدمة الحذف النهائي للمعلم مع الرسالة
+            var resultMessage = await _teacherService.DeleteTeacherPermanentlyWithMessageAsync(id);
+
+            // إذا كانت النتيجة هي نجاح، نعرض رسالة نجاح
+            if (resultMessage == "تم حذف المعلم نهائيًا بنجاح")
+            {
+                TempData["Success"] = resultMessage;
+            }
+            else
+            {
+                // إذا كان هناك رسالة خطأ، نعرض رسالة الخطأ
+                TempData["Error"] = resultMessage;
+            }
+
+            // إعادة توجيه إلى صفحة المعلمين المحذوفين
+            return RedirectToAction(nameof(Deleted));
+        }
+
+
     }
 }

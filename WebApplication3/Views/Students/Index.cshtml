@@ -1,41 +1,86 @@
-﻿@model List<WebApplication3.ViewModels.StudentViewModel>
+﻿@model IEnumerable<WebApplication3.ViewModels.StudentViewModel>
 
 @{
-    ViewData["Title"] = "Students List";
+    ViewData["Title"] = "Students";
 }
 
-<h2>Students List</h2>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-primary">@ViewData["Title"]</h2>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Teacher</th>
-            <th>Courses</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var student in Model)
+        @if (User.IsInRole("Admin"))
         {
-            <tr>
-                <td>@student.Name</td>
-                <td>@student.Teachers</td>
-                <td>
-                    @foreach (var course in student.Courses)
-                    {
-                        <span>@course.Text</span>
-
-                        <br />
-                    }
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@student.Id" class="btn btn-warning btn-sm">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@student.Id" class="btn btn-danger btn-sm">Delete</a>
-                </td>
-            </tr>
+            <div>
+                <a asp-action="Create" class="btn btn-success me-2">
+                    <i class="bi bi-plus-circle"></i> Add New Student
+                </a>
+            </div>
         }
-    </tbody>
-</table>
+    </div>
 
-<a asp-action="Create" class="btn btn-primary">Create New Student</a>
+    <!-- عرض الرسائل من TempData -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
+    <!-- جدول الطلاب -->
+    <table class="table table-hover table-bordered shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>اسم الطالب</th>
+                <th>اسم الكورس</th>
+                <th>اسم المدرس</th>
+                @if (User.IsInRole("Admin"))
+                {
+                    <th style="width: 250px;">الإجراءات</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in Model)
+            {
+                <tr>
+                    <td>@student.Name</td>
+                    <td>@student.CourseName</td>
+                    <td>@student.TeacherName</td>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <td>
+                            @if (student.IsDeleted)
+                            {
+                                <!-- استعادة الطالب المحذوف -->
+                                <form asp-action="Restore" asp-route-id="@student.Id" method="post" style="display:inline;" onsubmit="return confirm('هل أنت متأكد أنك تريد استعادة هذا الطالب؟');">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="bi bi-arrow-clockwise"></i> Restore
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <!-- تعديل وحذف الطالب -->
+                                <a asp-action="Edit" asp-route-id="@student.Id" class="btn btn-warning btn-sm me-1">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@student.Id" method="post" style="display:inline;" onsubmit="return confirm('هل أنت متأكد أنك تريد حذف هذا الطالب؟');">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

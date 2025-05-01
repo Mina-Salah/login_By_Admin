@@ -1,0 +1,258 @@
+﻿@{
+    ViewData["Title"] = "Deleted Items Management";
+    Layout = "_AdminLayout"; // Use admin-specific layout if available
+}
+
+@if (User.IsInRole("Admin"))
+{
+    <div class="deleted-items-container">
+        <!-- Page Header -->
+        <div class="page-header mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-trash-alt fa-2x text-secondary me-3"></i>
+                <div>
+                    <h1 class="page-title mb-0">@ViewData["Title"]</h1>
+                    <p class="page-subtitle text-muted mb-0">Review and manage soft-deleted items</p>
+                </div>
+            </div>
+            <hr class="mt-2 mb-4">
+        </div>
+
+        <!-- Notification Alerts -->
+        <div class="alerts-container">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show">
+                    <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+        </div>
+
+        <!-- Deleted Items Cards -->
+        <div class="row g-4">
+            <!-- Deleted Courses Card -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-book me-2"></i>Deleted Courses
+                        </h5>
+                        <span class="badge bg-white text-primary">@Model.Courses?.Count</span>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Courses?.Count > 0)
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Course Name</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var course in Model.Courses)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <span class="fw-semibold">@course.Name</span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <form asp-action="Restore" method="post" class="me-1">
+                                                            <input type="hidden" name="id" value="@course.Id" />
+                                                            <input type="hidden" name="modelName" value="Course" />
+                                                            <button type="submit" class="btn btn-outline-success"
+                                                                    data-bs-toggle="tooltip" title="Restore">
+                                                                <i class="fas fa-undo"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form asp-action="DeletePermanently" method="post">
+                                                            <input type="hidden" name="id" value="@course.Id" />
+                                                            <input type="hidden" name="modelName" value="Course" />
+                                                            <button type="submit" class="btn btn-outline-danger"
+                                                                    data-bs-toggle="tooltip" title="Delete Permanently">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="fas fa-book-open fa-2x text-muted mb-3"></i>
+                                <p class="text-muted mb-0">No deleted courses found</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deleted Teachers Card -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>Deleted Teachers
+                        </h5>
+                        <span class="badge bg-white text-info">@Model.Teachers?.Count</span>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Teachers?.Count > 0)
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Teacher Name</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var teacher in Model.Teachers)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <span class="fw-semibold">@teacher.Name</span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <form asp-action="Restore" method="post" class="me-1">
+                                                            <input type="hidden" name="id" value="@teacher.Id" />
+                                                            <input type="hidden" name="modelName" value="Teacher" />
+                                                            <button type="submit" class="btn btn-outline-success"
+                                                                    data-bs-toggle="tooltip" title="Restore">
+                                                                <i class="fas fa-undo"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form asp-action="DeletePermanently" method="post">
+                                                            <input type="hidden" name="id" value="@teacher.Id" />
+                                                            <input type="hidden" name="modelName" value="Teacher" />
+                                                            <button type="submit" class="btn btn-outline-danger"
+                                                                    data-bs-toggle="tooltip" title="Delete Permanently">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="fas fa-user-tie fa-2x text-muted mb-3"></i>
+                                <p class="text-muted mb-0">No deleted teachers found</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deleted Students Card -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-user-graduate me-2"></i>Deleted Students
+                        </h5>
+                        <span class="badge bg-white text-warning">@Model.Students?.Count</span>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Students?.Count > 0)
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Student Name</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var student in Model.Students)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <span class="fw-semibold">@student.Name</span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <div class="btn-group btn-group-sm" role="group">
+                                                        <form asp-action="Restore" method="post" class="me-1">
+                                                            <input type="hidden" name="id" value="@student.Id" />
+                                                            <input type="hidden" name="modelName" value="Student" />
+                                                            <button type="submit" class="btn btn-outline-success"
+                                                                    data-bs-toggle="tooltip" title="Restore">
+                                                                <i class="fas fa-undo"></i>
+                                                            </button>
+                                                        </form>
+                                                        <form asp-action="DeletePermanently" method="post">
+                                                            <input type="hidden" name="id" value="@student.Id" />
+                                                            <input type="hidden" name="modelName" value="Student" />
+                                                            <button type="submit" class="btn btn-outline-danger"
+                                                                    data-bs-toggle="tooltip" title="Delete Permanently">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-state">
+                                <i class="fas fa-users fa-2x text-muted mb-3"></i>
+                                <p class="text-muted mb-0">No deleted students found</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="access-denied">
+        <div class="alert alert-danger border-0 shadow-sm">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-ban fa-2x me-3"></i>
+                <div>
+                    <h4 class="alert-heading mb-1">Access Denied</h4>
+                    <p class="mb-0">You don't have permission to access this page.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        // Initialize tooltips
+        $(document).ready(function(){
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}

@@ -21,36 +21,27 @@ namespace WebApplication3.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // علاقة One-to-Many بين Teacher و Student
+            modelBuilder.Entity<Student>()
+                    .HasOne(s => s.Course)
+                    .WithMany(c => c.Students)
+                    .HasForeignKey(s => s.CourseId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.Teacher)
                 .WithMany(t => t.Students)
                 .HasForeignKey(s => s.TeacherId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // علاقة One-to-Many بين Teacher و Course
             modelBuilder.Entity<Course>()
                 .HasOne(c => c.Teacher)
                 .WithMany(t => t.Courses)
                 .HasForeignKey(c => c.TeacherId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // علاقة Many-to-Many بين Student و Course
             modelBuilder.Entity<StudentCourse>()
-                .HasKey(sc => new { sc.StudentId, sc.CourseId });
+          .HasKey(sc => new { sc.StudentId, sc.CourseId });
 
-            modelBuilder.Entity<StudentCourse>()
-                .HasOne(sc => sc.Student)
-                .WithMany(s => s.StudentCourses)
-                .HasForeignKey(sc => sc.StudentId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<StudentCourse>()
-                .HasOne(sc => sc.Course)
-                .WithMany(c => c.StudentCourses)
-                .HasForeignKey(sc => sc.CourseId)
-                .OnDelete(DeleteBehavior.Restrict);
         }
-
     }
 }

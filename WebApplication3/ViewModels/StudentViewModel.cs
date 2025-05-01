@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace WebApplication3.ViewModels
 {
@@ -7,12 +6,30 @@ namespace WebApplication3.ViewModels
     {
         public int Id { get; set; }
 
+        [Required(ErrorMessage = "Student name is required")]
+        [Display(Name = "Student Name")]
         public string Name { get; set; }
 
+        [Display(Name = "Is Deleted?")]
+        public bool IsDeleted { get; set; }
+
+        // Course Info
+        [Required(ErrorMessage = "Course is required")]
+        [Display(Name = "Course")]
+        public int CourseId { get; set; }
+
+        [Display(Name = "Course Name")]
+        public string? CourseName { get; set; }
+
+        // Teacher Info
+        [Display(Name = "Teacher")]
         public int TeacherId { get; set; }
-        public List<int> CourseIds { get; set; } = new();
-        // لعرض أسماء المدرسين والدورات في الفيو
-        public List<SelectListItem> Teachers { get; set; }
-        public List<SelectListItem> Courses { get; set; }
+
+        [Display(Name = "Teacher Name")]
+        public string? TeacherName { get; set; }
+
+        // For dropdown lists
+        public List<CourseViewModel>? AvailableCourses { get; set; }
+        public List<TeacherViewModel>? AvailableTeachers { get; set; }
     }
 }

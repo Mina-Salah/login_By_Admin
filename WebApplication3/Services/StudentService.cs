@@ -1,92 +1,72 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using WebApplication3.Data;
+using AutoMapper;
+using WebApplication3.Repositories;
+using WebApplication3.ViewModels;
 using WebApplication3.Models;
-using System.Linq;
 
 namespace WebApplication3.Services
 {
     public class StudentService : IStudentService
     {
-        private readonly SchoolContext _context;
+        private readonly IGenericRepository<Student> _studentRepository;
+        private readonly IMapper _mapper;
 
-        public StudentService(SchoolContext context)
+        public StudentService(IGenericRepository<Student> studentRepository, IMapper mapper)
         {
-            _context = context;
+            _studentRepository = studentRepository;
+            _mapper = mapper;
         }
 
-        // الحصول على كل الطلاب مع المدرسين والدورات
-        public async Task<List<Student>> GetAllAsync()
+        public async Task<IEnumerable<StudentViewModel>> GetAllStudentsAsync()
         {
-            return await _context.Students
-                .Include(s => s.Teacher)
-                .Include(s => s.StudentCourses)
-                    .ThenInclude(sc => sc.Course)
-                .Where(s => !s.IsDeleted)
-                .ToListAsync();
+            var students = await _studentRepository.GetAllAsync(
+                query => query
+                    .Where(s => !s.IsDeleted) // جلب الطلاب غير المحذوفين فقط
+                    .Include(s => s.Course)
+                    .Include(s => s.Teacher));
+
+            return _mapper.Map<IEnumerable<StudentViewModel>>(students);
         }
 
-        // الحصول على طالب واحد بالمعرف مع المدرس والدورات
-        public async Task<Student> GetByIdAsync(int id)
+
+        public async Task<StudentViewModel?> GetStudentByIdAsync(int id)
         {
-            return await _context.Students
-                .Include(s => s.Teacher)
-                .Include(s => s.StudentCourses)
-                    .ThenInclude(sc => sc.Course)
-                .FirstOrDefaultAsync(s => s.Id == id && !s.IsDeleted);
+            var student = await _studentRepository.GetByIdAsync(id,
+                include: query => query
+                    .Include(s => s.Course)
+                    .Include(s => s.Teacher));
+
+            return student == null ? null : _mapper.Map<StudentViewModel>(student);
         }
 
-        // إضافة طالب جديد مع ربطه بالدورات
-        public async Task AddAsync(Student student, List<int> courseIds)
+        public async Task AddStudentAsync(StudentViewModel studentViewModel)
         {
-            _context.Students.Add(student);
-
-            foreach (var courseId in courseIds)
-            {
-                var studentCourse = new StudentCourse
-                {
-                    StudentId = student.Id,
-                    CourseId = courseId
-                };
-                _context.StudentCourses.Add(studentCourse);
-            }
-
-            await _context.SaveChangesAsync();
+            var student = _mapper.Map<Student>(studentViewModel);
+            await _studentRepository.AddAsync(student);
+            await _studentRepository.SaveAsync();
         }
 
-        // تحديث طالب مع ربطه بالدورات
-        public async Task UpdateAsync(Student student, List<int> courseIds)
+        public async Task UpdateStudentAsync(StudentViewModel studentViewModel)
         {
-            _context.Students.Update(student);
+            var existingStudent = await _studentRepository.GetByIdAsync(studentViewModel.Id);
+            if (existingStudent == null)
+                throw new Exception("Student not found");
 
-            // حذف الدورات القديمة المربوطة بالطالب
-            var existingStudentCourses = _context.StudentCourses
-                .Where(sc => sc.StudentId == student.Id)
-                .ToList();
-            _context.StudentCourses.RemoveRange(existingStudentCourses);
-
-            // إضافة الدورات الجديدة
-            foreach (var courseId in courseIds)
-            {
-                var studentCourse = new StudentCourse
-                {
-                    StudentId = student.Id,
-                    CourseId = courseId
-                };
-                _context.StudentCourses.Add(studentCourse);
-            }
-
-            await _context.SaveChangesAsync();
+            _mapper.Map(studentViewModel, existingStudent);
+            _studentRepository.Update(existingStudent);
+            await _studentRepository.SaveAsync();
         }
 
-        // حذف طالب
-        public async Task DeleteAsync(int id)
+        public async Task DeleteStudentAsync(int id)
         {
-            var student = await _context.Students.FindAsync(id);
-            if (student != null)
-            {
-                student.IsDeleted = true;
-                await _context.SaveChangesAsync();
-            }
+            var student = await _studentRepository.GetByIdAsync(id);
+            if (student == null)
+                throw new Exception("Student not found");
+
+            // استخدام Soft Delete
+            student.IsDeleted = true;
+            _studentRepository.Update(student);
+            await _studentRepository.SaveAsync();
         }
     }
 }

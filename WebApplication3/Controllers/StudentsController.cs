@@ -1,174 +1,161 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using WebApplication3.Data;
+using WebApplication3.Models;
 using WebApplication3.Services;
 using WebApplication3.ViewModels;
-using WebApplication3.Models;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace WebApplication3.Controllers
 {
-    // Restricting access to the entire controller for users with "Admin" role
-    [Authorize(Roles = "Admin")] 
+    [Authorize] // حماية الوصول لجميع الأفعال للمستخدمين المصادق عليهم
     public class StudentsController : Controller
     {
         private readonly IStudentService _studentService;
-        private readonly ITeacherService _teacherService;
-        private readonly ICourseService _courseService;
+        private readonly SchoolContext _context;
         private readonly IMapper _mapper;
 
         public StudentsController(
             IStudentService studentService,
-            ITeacherService teacherService,
-            ICourseService courseService,
+            SchoolContext context,
             IMapper mapper)
         {
             _studentService = studentService;
-            _teacherService = teacherService;
-            _courseService = courseService;
+            _context = context;
             _mapper = mapper;
         }
 
-        // Action to display all students (accessible by any logged-in user)
+        // GET: Students
         public async Task<IActionResult> Index()
         {
-            var students = await _studentService.GetAllAsync();
-            var viewModels = _mapper.Map<List<StudentViewModel>>(students);
-            return View(viewModels);
+            var students = await _studentService.GetAllStudentsAsync();
+            return View(students);
         }
-        // Action to show the student creation page (only accessible by "Admin" users)
-        [Authorize(Roles = "Admin")]
+
+        // GET: Students/Create
+        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         public async Task<IActionResult> Create()
         {
-            var teachers = await _teacherService.GetAllTeachersAsync();
-            var courses = await _courseService.GetAllAsync();
-
-            ViewBag.Teachers = teachers.Select(t => new SelectListItem
-            {
-                Value = t.Id.ToString(),
-                Text = t.Name
-            }).ToList();
-
-            ViewBag.Courses = courses.Select(c => new SelectListItem
-            {
-                Value = c.Id.ToString(),
-                Text = c.Name
-            }).ToList();
-
+            await LoadDropdowns();
             return View();
         }
 
-        // Action to handle the creation of a new student (only accessible by "Admin" users)
+        // POST: Students/Create
         [HttpPost]
+        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create(StudentViewModel model)
+        public async Task<IActionResult> Create(StudentViewModel studentViewModel)
         {
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                var teachers = await _teacherService.GetAllTeachersAsync();
-                var courses = await _courseService.GetAllAsync();
-
-                // Re-populate the teachers and courses in case of input errors
-                ViewBag.Teachers = teachers.Select(t => new SelectListItem
+                try
                 {
-                    Value = t.Id.ToString(),
-                    Text = t.Name
-                }).ToList();
-
-                ViewBag.Courses = courses.Select(c => new SelectListItem
+                    await _studentService.AddStudentAsync(studentViewModel);
+                    TempData["Success"] = "Student created successfully!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
                 {
-                    Value = c.Id.ToString(),
-                    Text = c.Name
-                }).ToList();
-
-                return View(model);
+                    ModelState.AddModelError("", ex.Message);
+                }
             }
 
-            var student = _mapper.Map<Student>(model);
-            await _studentService.AddAsync(student, model.CourseIds); // Add the student with associated courses
-            return RedirectToAction(nameof(Index));
+            await LoadDropdowns(studentViewModel.CourseId, studentViewModel.TeacherId);
+            return View(studentViewModel);
         }
 
-        // Action to show the student edit page (only accessible by "Admin" users)
-        [Authorize(Roles = "Admin")]
+        // GET: Students/Edit/5
+        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         public async Task<IActionResult> Edit(int id)
         {
-            var student = await _studentService.GetByIdAsync(id);
-            if (student == null) return NotFound();
-
-            var viewModel = _mapper.Map<StudentViewModel>(student);
-            var teachers = await _teacherService.GetAllTeachersAsync();
-            var courses = await _courseService.GetAllAsync();
-
-            ViewBag.Teachers = teachers.Select(t => new SelectListItem
+            var studentViewModel = await _studentService.GetStudentByIdAsync(id);
+            if (studentViewModel == null)
             {
-                Value = t.Id.ToString(),
-                Text = t.Name
-            }).ToList();
-
-            ViewBag.Courses = courses.Select(c => new SelectListItem
-            {
-                Value = c.Id.ToString(),
-                Text = c.Name
-            }).ToList();
-
-            return View(viewModel);
-        }
-
-        // Action to handle student updates (only accessible by "Admin" users)
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, StudentViewModel model)
-        {
-            if (id != model.Id) return NotFound();
-
-            if (!ModelState.IsValid)
-            {
-                var teachers = await _teacherService.GetAllTeachersAsync();
-                var courses = await _courseService.GetAllAsync();
-
-                // Re-populate the teachers and courses in case of input errors
-                ViewBag.Teachers = teachers.Select(t => new SelectListItem
-                {
-                    Value = t.Id.ToString(),
-                    Text = t.Name
-                }).ToList();
-
-                ViewBag.Courses = courses.Select(c => new SelectListItem
-                {
-                    Value = c.Id.ToString(),
-                    Text = c.Name
-                }).ToList();
-
-                return View(model);
+                return NotFound();
             }
 
-            var student = _mapper.Map<Student>(model);
-            await _studentService.UpdateAsync(student, model.CourseIds); // Update the student and associated courses
-            return RedirectToAction(nameof(Index));
+            await LoadDropdowns(studentViewModel.CourseId, studentViewModel.TeacherId);
+            return View(studentViewModel);
         }
 
-        // Action to show the delete confirmation page (only accessible by "Admin" users)
-        [Authorize(Roles = "Admin")]
+        // POST: Students/Edit/5
+        [HttpPost]
+        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, StudentViewModel studentViewModel)
+        {
+            if (id != studentViewModel.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    await _studentService.UpdateStudentAsync(studentViewModel);
+                    TempData["Success"] = "Student updated successfully!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                }
+            }
+
+            await LoadDropdowns(studentViewModel.CourseId, studentViewModel.TeacherId);
+            return View(studentViewModel);
+        }
+
+        // GET: Students/Delete/5
+        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         public async Task<IActionResult> Delete(int id)
         {
-            var student = await _studentService.GetByIdAsync(id);
-            if (student == null) return NotFound();
+            var studentViewModel = await _studentService.GetStudentByIdAsync(id);
+            if (studentViewModel == null)
+            {
+                return NotFound();
+            }
 
-            var viewModel = _mapper.Map<StudentViewModel>(student);
-            return View(viewModel);
+            return View(studentViewModel);
         }
 
-        // Action to confirm the deletion of a student (only accessible by "Admin" users)
+        // POST: Students/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _studentService.DeleteAsync(id); // Delete the student
+            try
+            {
+                await _studentService.DeleteStudentAsync(id); // استخدام Soft Delete
+                TempData["Success"] = "Student deleted successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
             return RedirectToAction(nameof(Index));
+        }
+
+
+        private async Task LoadDropdowns(int? selectedCourseId = null, int? selectedTeacherId = null)
+        {
+            var courses = await _context.Courses
+                .Where(c => !c.IsDeleted)
+                .Select(c => new CourseViewModel { Id = c.Id, Name = c.Name })
+                .ToListAsync();
+
+            var teachers = await _context.Teachers
+                .Where(t => !t.IsDeleted)
+                .Select(t => new TeacherViewModel { Id = t.Id, Name = t.Name })
+                .ToListAsync();
+
+            ViewBag.Courses = new SelectList(courses, "Id", "Name", selectedCourseId);
+            ViewBag.Teachers = new SelectList(teachers, "Id", "Name", selectedTeacherId);
         }
     }
 }

@@ -7,11 +7,26 @@
 <div class="container mt-4">
     <h2 class="text-danger">@ViewData["Title"]</h2>
 
+    <!-- عرض الرسائل من TempData -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+
     <table class="table table-hover table-bordered shadow-sm">
         <thead class="table-dark">
             <tr>
-                <th>Name</th>
-                <th>Actions</th>
+                <th>الاسم</th>
+                <th>الإجراءات</th>
             </tr>
         </thead>
         <tbody>
@@ -20,16 +35,63 @@
                 <tr>
                     <td>@teacher.Name</td>
                     <td>
-                        <form asp-action="Restore" asp-route-id="@teacher.Id" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to restore this teacher?');">
+                        <!-- زر استرجاع المعلم -->
+                        <form asp-action="Restore" asp-route-id="@teacher.Id" method="post" style="display:inline;">
                             <button type="submit" class="btn btn-success btn-sm">
-                                <i class="bi bi-arrow-clockwise"></i> Restore
+                                <i class="bi bi-arrow-clockwise"></i> استرجاع
                             </button>
                         </form>
+
+                        <!-- زر حذف نهائي يفتح المودال -->
+                        <button type="button" class="btn btn-danger btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal"
+                                data-teacher-id="@teacher.Id"
+                                data-teacher-name="@teacher.Name">
+                            <i class="bi bi-trash-fill"></i> حذف نهائي
+                        </button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 
-    <a asp-action="Index" class="btn btn-secondary">Back to Teacher List</a>
+    <a asp-action="Index" class="btn btn-secondary">الرجوع لقائمة المعلمين</a>
 </div>
+
+<!-- ✅ مودال الحذف النهائي -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="deleteForm" method="post" asp-action="DeletePermanently" asp-controller="Teachers">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="teacherIdInput" />
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">تأكيد الحذف النهائي</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+                </div>
+                <div class="modal-body">
+                    هل أنت متأكد أنك تريد حذف <strong id="teacherName"></strong> نهائيًا؟ لا يمكن التراجع عن هذا الإجراء.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-danger">نعم، حذف نهائي</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const teacherId = button.getAttribute('data-teacher-id');
+            const teacherName = button.getAttribute('data-teacher-name');
+
+            document.getElementById('teacherName').textContent = teacherName;
+            document.getElementById('teacherIdInput').value = teacherId;
+        });
+    </script>
+}

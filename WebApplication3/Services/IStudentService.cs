@@ -1,13 +1,13 @@
-﻿using WebApplication3.Models;
+﻿using WebApplication3.ViewModels;
 
 namespace WebApplication3.Services
 {
     public interface IStudentService
     {
-        Task<List<Student>> GetAllAsync();
-        Task<Student> GetByIdAsync(int id);
-        Task AddAsync(Student student, List<int> courseIds); // تم إضافة List<int> courseIds
-        Task UpdateAsync(Student student, List<int> courseIds); // تم إضافة List<int> courseIds
-        Task DeleteAsync(int id);
+        Task<IEnumerable<StudentViewModel>> GetAllStudentsAsync();
+        Task<StudentViewModel?> GetStudentByIdAsync(int id);
+        Task AddStudentAsync(StudentViewModel studentViewModel);
+        Task UpdateStudentAsync(StudentViewModel studentViewModel);
+        Task DeleteStudentAsync(int id);
     }
 }
