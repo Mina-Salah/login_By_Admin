@@ -9,85 +9,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
 
-    <!-- Bootstrap 5 CSS -->
+    <!-- Bootstrap & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- Custom Admin CSS -->
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
 
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <div class="admin-wrapper d-flex">
-        <!-- Sidebar Navigation -->
-        <nav id="sidebar" class="sidebar bg-dark text-white">
-            <div class="sidebar-header py-4">
-                <a asp-controller="Auth" asp-action="Welcome" class="d-flex align-items-center text-decoration-none text-white">
-                    <i class="fas fa-school me-2"></i>
-                    <span class="fs-4 fw-bold">School Admin</span>
-                </a>
-            </div>
 
-            <ul class="sidebar-nav list-unstyled">
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Teachers" asp-action="Index">
-                        <i class="fas fa-chalkboard-teacher me-2"></i> Teachers
+        @if (User.Identity.IsAuthenticated)
+        {
+            <!-- Sidebar -->
+            <nav id="sidebar" class="sidebar bg-dark text-white">
+                <div class="sidebar-header py-4">
+                    <a asp-controller="Auth" asp-action="Welcome" class="d-flex align-items-center text-decoration-none text-white">
+                        <i class="fas fa-school me-2"></i>
+                        <span class="fs-4 fw-bold">School Admin</span>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Course" asp-action="Index">
-                        <i class="fas fa-book me-2"></i> Courses
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Students" asp-action="Index">
-                        <i class="fas fa-user-graduate me-2"></i> Students
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" asp-controller="DeletedData" asp-action="Index">
-                        <i class="fas fa-trash-restore me-2"></i> Deleted Items
-                    </a>
-                </li>
-                <li class="nav-divider my-3"></li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Home" asp-action="Privacy">
-                        <i class="fas fa-shield-alt me-2"></i> Privacy
-                    </a>
-                </li>
-            </ul>
-        </nav>
+                </div>
+
+                <ul class="sidebar-nav list-unstyled">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Teachers" asp-action="Index">
+                            <i class="fas fa-chalkboard-teacher me-2"></i> Teachers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Course" asp-action="Index">
+                            <i class="fas fa-book me-2"></i> Courses
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Students" asp-action="Index">
+                            <i class="fas fa-user-graduate me-2"></i> Students
+                        </a>
+                    </li>
+                    @if (User.IsInRole("Admin") || User.HasClaim("UserType", "Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="DeletedData" asp-action="Index">
+                                <i class="fas fa-trash-restore me-2"></i> Deleted Items
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
 
         <!-- Main Content -->
         <div class="main-content flex-fill">
-            <!-- Top Navigation -->
+            <!-- Top Navbar -->
             <nav class="top-nav navbar navbar-expand navbar-light bg-white shadow-sm">
                 <div class="container-fluid">
-                    <button class="sidebar-toggle btn btn-link" type="button">
-                        <i class="fas fa-bars"></i>
-                    </button>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <button class="sidebar-toggle btn btn-link" type="button">
+                            <i class="fas fa-bars"></i>
+                        </button>
 
-                    <div class="d-flex align-items-center ms-auto">
-                        <span class="navbar-text text-dark me-3">
-                            <i class="fas fa-user-circle me-1"></i>
-                            Welcome, @User.Identity.Name
-                        </span>
-                        <form method="post" action="@Url.Action("Logout", "Auth")" class="d-inline">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-sign-out-alt me-1"></i> Logout
-                            </button>
-                        </form>
-                    </div>
+                        <div class="d-flex align-items-center ms-auto">
+                            <span class="navbar-text text-dark me-3">
+                                <i class="fas fa-user-circle me-1"></i>
+                                Welcome, @User.Identity.Name
+                            </span>
+                            <form method="post" action="@Url.Action("Logout", "Auth")" class="d-inline">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                                </button>
+                            </form>
+                        </div>
+                    }
                 </div>
             </nav>
 
-            <!-- Page Content -->
+            <!-- Page Body -->
             <main class="content-wrapper bg-light p-4">
                 <div class="container-fluid">
                     <div class="row">
@@ -97,26 +97,20 @@
             </main>
 
             <!-- Footer -->
-            <footer class="footer bg-dark text-white border-top">
-                <div class="container-fluid">
-                    <div class="d-flex align-items-center justify-content-between small">
-                        <div>&copy; School Management System @DateTime.Now.Year</div>
-                        <div>
-                            <a asp-controller="Home" asp-action="Privacy" class="text-white">Privacy Policy</a>
-                        </div>
+            <footer class="footer bg-dark text-white border-top py-2">
+                <div class="container-fluid d-flex justify-content-between small">
+                    <div>&copy; School Management System @DateTime.Now.Year</div>
+                    <div>
+                        <a asp-controller="Home" asp-action="Privacy" class="text-white">Privacy Policy</a>
                     </div>
                 </div>
             </footer>
         </div>
     </div>
 
-    <!-- jQuery -->
+    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
-    <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Custom Admin JS -->
     <script src="~/js/admin.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)

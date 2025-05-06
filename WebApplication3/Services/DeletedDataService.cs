@@ -13,7 +13,6 @@ namespace WebApplication3.Services
             _context = context;
         }
 
-        // الحصول على البيانات المحذوفة لكل موديل
         public async Task<List<T>> GetDeletedDataAsync<T>() where T : class
         {
             if (typeof(T) == typeof(Course))
@@ -31,7 +30,6 @@ namespace WebApplication3.Services
             return null;
         }
 
-        // حذف السجلات المحذوفة نهائيًا
         public async Task DeletePermanentlyAsync<T>(int id) where T : class
         {
             if (typeof(T) == typeof(Course))
@@ -39,7 +37,6 @@ namespace WebApplication3.Services
                 var course = await _context.Courses.FindAsync(id);
                 if (course != null)
                 {
-                    // تحقق إذا كان هناك أي طلاب مرتبطين بهذا الكورس
                     var students = await _context.Students.Where(s => s.CourseId == course.Id).ToListAsync();
                     if (students.Any())
                     {
@@ -55,7 +52,6 @@ namespace WebApplication3.Services
                 var teacher = await _context.Teachers.FindAsync(id);
                 if (teacher != null)
                 {
-                    // تحقق إذا كان هناك أي كورسات مرتبطه بهذا المدرس
                     var courses = await _context.Courses.Where(c => c.TeacherId == teacher.Id).ToListAsync();
                     if (courses.Any())
                     {
@@ -71,21 +67,12 @@ namespace WebApplication3.Services
                 var student = await _context.Students.FindAsync(id);
                 if (student != null)
                 {
-                    // تحقق إذا كان الطالب مرتبط بكورس
-                    var course = await _context.Courses.FirstOrDefaultAsync(c => c.Id == student.CourseId);
-                    if (course != null)
-                    {
-                        throw new InvalidOperationException($"لا يمكن حذف الطالب لأنه مرتبط بكورس {course.Name}.");
-                    }
-
                     _context.Students.Remove(student);
                     await _context.SaveChangesAsync();
                 }
             }
         }
 
-
-        // استعادة السجلات المحذوفة
         public async Task RestoreAsync<T>(int id) where T : class
         {
             if (typeof(T) == typeof(Course))

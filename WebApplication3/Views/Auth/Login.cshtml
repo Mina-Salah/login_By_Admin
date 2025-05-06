@@ -6,12 +6,12 @@
 
 <form method="post" action="@Url.Action("Login", "Auth")" class="w-50 mx-auto">
     <div class="form-group">
-        <label for="username">Username:</label>
+        <label for="email">Email:</label>
         <div class="input-group">
             <div class="input-group-text">
-                <i class="bi bi-person"></i>
+                <i class="bi bi-envelope"></i>
             </div>
-            <input type="text" id="username" name="username" class="form-control" required />
+            <input type="email" id="email" name="email" class="form-control" required />
         </div>
     </div>
 
@@ -33,6 +33,9 @@
     </div>
 
     <button type="submit" class="btn btn-primary mt-4 w-100">Login</button>
+    <p class="text-center mt-2">
+        <a href="@Url.Action("ForgotPassword", "Auth")">Forgot your password?</a>
+    </p>
 </form>
 
 @if (ViewBag.Message != null)
@@ -50,10 +53,6 @@
     // Toggle password visibility
     document.getElementById("showPasswordCheck").addEventListener("change", function () {
         var passwordInput = document.getElementById("password");
-        if (this.checked) {
-            passwordInput.type = "text"; // Show password
-        } else {
-            passwordInput.type = "password"; // Hide password
-        }
+        passwordInput.type = this.checked ? "text" : "password";
     });
 </script>

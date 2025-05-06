@@ -82,15 +82,15 @@ namespace WebApplication3.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [Authorize(Roles = "Admin")]
+       /* [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Deleted()
         {
             var deletedTeachers = await _teacherService.GetDeletedTeachersAsync();
             var model = _mapper.Map<List<TeacherViewModel>>(deletedTeachers);
             return View("Deleted", model); // View مخصص للـ Deleted Teachers
-        }
+        }*/
 
-        [HttpPost]
+       /* [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
@@ -98,9 +98,9 @@ namespace WebApplication3.Controllers
             await _teacherService.RestoreTeacherAsync(id);
             TempData["Success"] = "تم استرجاع المعلم بنجاح";
             return RedirectToAction(nameof(Deleted));
-        }
+        }*/
 
-        [HttpPost]
+      /*  [HttpPost]
         [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeletePermanently(int id)
@@ -121,7 +121,7 @@ namespace WebApplication3.Controllers
 
             // إعادة توجيه إلى صفحة المعلمين المحذوفين
             return RedirectToAction(nameof(Deleted));
-        }
+        }*/
 
 
     }

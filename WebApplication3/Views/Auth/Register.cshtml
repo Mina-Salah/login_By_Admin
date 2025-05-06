@@ -1,41 +1,26 @@
 ﻿@{
-    ViewData["Title"] = "تسجيل حساب جديد";
+    ViewData["Title"] = "Register";
 }
 
-<div class="d-flex justify-content-center align-items-center vh-100 bg-light">
-    <div class="card shadow-sm p-4" style="min-width: 400px;">
-        <div class="card-body">
-            <h3 class="text-center mb-4 text-primary">تسجيل حساب جديد</h3>
+<h2 class="text-center my-4">Register</h2>
 
-            <form method="post" action="@Url.Action("Register", "Auth")">
-                <div class="mb-3">
-                    <label for="username" class="form-label">اسم المستخدم:</label>
-                    <input type="text" id="username" name="username" class="form-control" placeholder="ادخل اسم المستخدم" required />
-                </div>
-
-                <div class="mb-3">
-                    <label for="password" class="form-label">كلمة المرور:</label>
-                    <input type="password" id="password" name="password" class="form-control" placeholder="********" required />
-                </div>
-
-                <div class="mb-3">
-                    <label for="confirmPassword" class="form-label">تأكيد كلمة المرور:</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="********" required />
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100">تسجيل</button>
-            </form>
-
-            @if (ViewBag.Message != null)
-            {
-                <div class="alert alert-danger mt-3 text-center">
-                    @ViewBag.Message
-                </div>
-            }
-
-            <p class="text-center mt-4">
-                لديك حساب بالفعل؟ <a href="@Url.Action("Login", "Auth")" class="text-decoration-none">تسجيل الدخول</a>
-            </p>
-        </div>
+<form method="post" action="@Url.Action("Register", "Auth")" class="w-50 mx-auto">
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" class="form-control" required />
     </div>
-</div>
+
+    <div class="form-group mt-3">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" class="form-control" required />
+    </div>
+
+    <button type="submit" class="btn btn-success mt-4 w-100">Register</button>
+</form>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-danger mt-3 text-center">
+        @ViewBag.Message
+    </div>
+}

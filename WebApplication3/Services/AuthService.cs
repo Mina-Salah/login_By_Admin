@@ -1,5 +1,4 @@
 ﻿using BCrypt.Net;
-using Org.BouncyCastle.Crypto.Generators;
 using WebApplication3.Models;
 using WebApplication3.Repositories;
 
@@ -9,63 +8,89 @@ namespace WebApplication3.Services
     {
         private readonly IGenericRepository<User> _userRepository;
 
-        // أدوار ثابتة
-        private const string AdminUsername = "Admin";
-        private const string AdminPassword = "Admin1412"; // تأكد من استخدام كلمة مرور قوية هنا
+        private const string AdminEmail = "admin@example.com";
+        private const string AdminPassword = "Admin1234";
 
         public AuthService(IGenericRepository<User> userRepository)
         {
             _userRepository = userRepository;
         }
 
-        // تسجيل مستخدم جديد
-        public async Task<bool> RegisterAsync(string username, string password)
+        public async Task<bool> RegisterAsync(string email, string password)
         {
             var hashed = HashPassword(password);
 
             var existingUser = (await _userRepository.GetAllAsync())
-                .FirstOrDefault(u => u.Username == username);
+                .FirstOrDefault(u => u.Email == email);
 
             if (existingUser != null)
-                return false; // موجود بالفعل
+                return false;
 
-            // إضافة مستخدم جديد
-            var user = new User { Username = username, PasswordHash = hashed, Role = "User" }; // تعيين الدور للمستخدم العادي
+            var user = new User
+            {
+                Email = email,
+                PasswordHash = hashed,
+                Role = "User"
+            };
+
             await _userRepository.AddAsync(user);
             await _userRepository.SaveAsync();
             return true;
         }
 
-        // تسجيل دخول المستخدم
-        public async Task<User?> LoginAsync(string username, string password)
+        public async Task<User?> LoginAsync(string email, string password)
         {
-            // التحقق من "admin" أولاً
-            if (username == AdminUsername && password == AdminPassword)
+            if (email == AdminEmail && password == AdminPassword)
             {
-                return new User { Username = AdminUsername, Role = "Admin" }; // إعادة "admin" مباشرة مع تحديد الدور
+                return new User
+                {
+                    Email = AdminEmail,
+                    Role = "Admin"
+                };
             }
 
             var users = await _userRepository.GetAllAsync();
-            var user = users.FirstOrDefault(u => u.Username == username);
+            var user = users.FirstOrDefault(u => u.Email == email);
 
             if (user != null && VerifyPassword(password, user.PasswordHash))
             {
-                return user; // إذا تم التحقق من كلمة المرور بنجاح
+                return user;
             }
 
-            return null; // إذا كانت بيانات الدخول غير صحيحة
+            return null;
         }
 
-        // تشفير كلمة المرور
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            var users = await _userRepository.GetAllAsync();
+            return users.FirstOrDefault(u => u.Email == email);
+        }
+
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return (List<User>)await _userRepository.GetAllAsync();
+        }
+
+        public async Task UpdateUserAsync(User user)
+        {
+            _userRepository.Update(user);
+            await _userRepository.SaveAsync();
+        }
+
         private string HashPassword(string password)
         {
-            return BCrypt.Net.BCrypt.HashPassword(password); // استخدام bcrypt لتخزين كلمة المرور
+            return BCrypt.Net.BCrypt.HashPassword(password);
         }
 
-        // التحقق من كلمة المرور
         private bool VerifyPassword(string password, string storedHash)
         {
-            return BCrypt.Net.BCrypt.Verify(password, storedHash); // التحقق من كلمة المرور باستخدام bcrypt
+            return BCrypt.Net.BCrypt.Verify(password, storedHash);
         }
+        public async Task<User?> GetUserByTokenAsync(string token)
+        {
+            var users = await _userRepository.GetAllAsync();
+            return users.FirstOrDefault(u => u.PasswordHash == token); // استخدم الـ token المرسل لتحديد المستخدم
+        }
+
     }
 }
