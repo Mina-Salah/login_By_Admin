@@ -164,6 +164,18 @@ body {
         border-color: #b02a37;
     }
 
+
+
+.sidebar-collapsed #sidebar {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+}
+
+.sidebar-collapsed .main-content {
+    margin-left: 0 !important;
+    transition: margin 0.3s ease;
+}
 /* Alert Styles */
 .alert {
     border: none;

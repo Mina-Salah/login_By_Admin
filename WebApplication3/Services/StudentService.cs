@@ -3,6 +3,7 @@ using AutoMapper;
 using WebApplication3.Repositories;
 using WebApplication3.ViewModels;
 using WebApplication3.Models;
+using WebApplication3.fillspec;
 
 namespace WebApplication3.Services
 {
@@ -19,25 +20,18 @@ namespace WebApplication3.Services
 
         public async Task<IEnumerable<StudentViewModel>> GetAllStudentsAsync()
         {
-            var students = await _studentRepository.GetAllAsync(
-                query => query
-                    .Where(s => !s.IsDeleted) // جلب الطلاب غير المحذوفين فقط
-                    .Include(s => s.Course)
-                    .Include(s => s.Teacher));
-
+            var spec = new StudentWithCourseAndTeacherSpecification();
+            var students = await _studentRepository.GetAllWithSpecAsync(spec);
             return _mapper.Map<IEnumerable<StudentViewModel>>(students);
         }
 
-
         public async Task<StudentViewModel?> GetStudentByIdAsync(int id)
         {
-            var student = await _studentRepository.GetByIdAsync(id,
-                include: query => query
-                    .Include(s => s.Course)
-                    .Include(s => s.Teacher));
-
+            var spec = new StudentWithCourseAndTeacherSpecification(id);
+            var student = await _studentRepository.GetBySpecAsync(spec);
             return student == null ? null : _mapper.Map<StudentViewModel>(student);
         }
+
 
         public async Task AddStudentAsync(StudentViewModel studentViewModel)
         {
