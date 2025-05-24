@@ -8,8 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using System.Net.Mail;
 using System.Net;
 
-namespace WebApplication3.Controllers
+namespace WebApplication3.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     [AllowAnonymous]
     public class AuthController : Controller
     {

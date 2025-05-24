@@ -10,7 +10,8 @@ using WebApplication3.ViewModels;
 
 namespace WebApplication3.Controllers
 {
-    [Authorize] // حماية الوصول لجميع الأفعال للمستخدمين المصادق عليهم
+    [Authorize]
+/*    [Area("Courses")]*/
     public class CourseController : Controller
     {
         private readonly ICourseService _courseService;

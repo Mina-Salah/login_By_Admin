@@ -7,6 +7,7 @@ using WebApplication3.ViewModels;
 
 namespace WebApplication3.Controllers
 {
+    /*[Area("TeacherArea")]*/
     [Authorize]
     public class TeachersController : Controller
     {
@@ -82,46 +83,6 @@ namespace WebApplication3.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-       /* [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Deleted()
-        {
-            var deletedTeachers = await _teacherService.GetDeletedTeachersAsync();
-            var model = _mapper.Map<List<TeacherViewModel>>(deletedTeachers);
-            return View("Deleted", model); // View مخصص للـ Deleted Teachers
-        }*/
-
-       /* [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Restore(int id)
-        {
-            await _teacherService.RestoreTeacherAsync(id);
-            TempData["Success"] = "تم استرجاع المعلم بنجاح";
-            return RedirectToAction(nameof(Deleted));
-        }*/
-
-      /*  [HttpPost]
-        [Authorize(Roles = "Admin")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeletePermanently(int id)
-        {
-            // استدعاء خدمة الحذف النهائي للمعلم مع الرسالة
-            var resultMessage = await _teacherService.DeleteTeacherPermanentlyWithMessageAsync(id);
-
-            // إذا كانت النتيجة هي نجاح، نعرض رسالة نجاح
-            if (resultMessage == "تم حذف المعلم نهائيًا بنجاح")
-            {
-                TempData["Success"] = resultMessage;
-            }
-            else
-            {
-                // إذا كان هناك رسالة خطأ، نعرض رسالة الخطأ
-                TempData["Error"] = resultMessage;
-            }
-
-            // إعادة توجيه إلى صفحة المعلمين المحذوفين
-            return RedirectToAction(nameof(Deleted));
-        }*/
 
 
     }

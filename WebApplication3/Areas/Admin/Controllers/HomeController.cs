@@ -10,11 +10,11 @@ namespace WebApplication3.Controllers
             // لو المستخدم مسجل دخول، حوله مباشرة على صفحة Welcome
             if (User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Welcome", "Auth");
+                return RedirectToAction("Welcome", "Auth", new { area = "Admin" });
             }
 
             // لو مش مسجل دخول، حوله لصفحة Login
-            return RedirectToAction("Login", "Auth");
+            return RedirectToAction("Login", "Auth", new { area = "Admin" });
         }
     }
 }

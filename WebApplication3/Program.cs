@@ -30,8 +30,8 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Auth/Login";            
-        options.AccessDeniedPath = "/Auth/AccessDenied"; 
+        options.LoginPath = "/Admin/Auth/Login";
+        options.AccessDeniedPath = "/Admin/Auth/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromHours(1); 
         options.SlidingExpiration = true; 
     });
@@ -58,6 +58,11 @@ app.UseAuthorization();
 
 
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
     name: "default",
-   pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.Run();
