@@ -35,25 +35,31 @@
 
                 <ul class="sidebar-nav list-unstyled">
                     <li class="nav-item">
-                    <a class="nav-link" asp-area="TeacherArea" asp-controller="Teachers" asp-action="Index">
+                    <a class="nav-link"  asp-controller="Teachers" asp-action="Index">
                             <i class="fas fa-chalkboard-teacher me-2"></i> Teachers
                         </a>
                     </li>
                 <li class="nav-item">
-                    <a class="nav-link" asp-area="Courses" asp-controller="Course" asp-action="Index">
+                    <a class="nav-link"  asp-controller="Course" asp-action="Index">
                         <i class="fas fa-book me-2"></i> Courses
                     </a>
                 </li>
 
+
                     <li class="nav-item">
-                    <a class="nav-link" asp-area="StudentsArea" asp-controller="Students" asp-action="Index">
+                    <a class="nav-link"  asp-controller="Students" asp-action="Index">
                             <i class="fas fa-user-graduate me-2"></i> Students
                         </a>
                     </li>
-                    @if (User.IsInRole("Admin") || User.HasClaim("UserType", "Admin"))
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="UserManagement" asp-action="AdminsList">
+                        <i class="fas fa-book me-2"></i> UserManagement
+                    </a>
+                </li>
+                @if (User.IsInRole("SuperAdmin") || User.HasClaim("UserType", "SuperAdmin"))
                     {
                         <li class="nav-item">
-                        <a class="nav-link" asp-area="DeletedDataArea" asp-controller="DeletedData" asp-action="Index">
+                        <a class="nav-link"  asp-controller="DeletedData" asp-action="Index">
                                 <i class="fas fa-trash-restore me-2"></i> Deleted Items
                             </a>
                         </li>
@@ -78,7 +84,7 @@
                                 <i class="fas fa-user-circle me-1"></i>
                                 Welcome, @User.Identity.Name
                             </span>
-                            <form method="post" action="@Url.Action("Logout", "Auth" ,new { area = "Admin" })" class="d-inline">
+                            <form method="post" action="@Url.Action("Logout", "Auth" )" class="d-inline">
                                 <button type="submit" class="btn btn-danger btn-sm">
                                     <i class="fas fa-sign-out-alt me-1"></i> Logout
                                 </button>

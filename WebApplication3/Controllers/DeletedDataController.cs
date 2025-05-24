@@ -5,7 +5,7 @@ using WebApplication3.Services;
 
 namespace WebApplication3.Controllers
 {
-    [Authorize(Roles = "Admin")] // فقط للمستخدمين الذين لديهم دور "Admin"
+    [Authorize(Roles = "SuperAdmin")]
     public class DeletedDataController : Controller
     {
         private readonly IDeletedDataService _deletedDataService;

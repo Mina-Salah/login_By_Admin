@@ -7,8 +7,7 @@ using WebApplication3.ViewModels;
 
 namespace WebApplication3.Controllers
 {
-    /*[Area("TeacherArea")]*/
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin")]
     public class TeachersController : Controller
     {
         private readonly ITeacherService _teacherService;
@@ -26,8 +25,6 @@ namespace WebApplication3.Controllers
             var teacherViewModels = _mapper.Map<List<TeacherViewModel>>(teachers);
             return View(teacherViewModels);
         }
-
-        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             var model = new TeacherViewModel();
@@ -36,7 +33,6 @@ namespace WebApplication3.Controllers
 
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TeacherViewModel model)
         {
@@ -49,7 +45,6 @@ namespace WebApplication3.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             var teacher = await _teacherService.GetTeacherByIdAsync(id);
@@ -60,7 +55,6 @@ namespace WebApplication3.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(TeacherViewModel model)
         {
@@ -73,7 +67,6 @@ namespace WebApplication3.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

@@ -20,5 +20,8 @@ namespace WebApplication3.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public string? ResetToken { get; set; }
         public DateTime? ResetTokenExpiry { get; set; }
+
+        // إضافة صلاحيات محددة
+        public string? Permissions { get; set; }
     }
 }

@@ -42,6 +42,13 @@ namespace WebApplication3.Data
             modelBuilder.Entity<StudentCourse>()
           .HasKey(sc => new { sc.StudentId, sc.CourseId });
 
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.Property(u => u.Role).HasDefaultValue("User");
+                entity.Property(u => u.IsActive).HasDefaultValue(true);
+                entity.Property(u => u.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            });
+
         }
     }
 }

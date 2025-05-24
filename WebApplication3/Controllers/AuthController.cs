@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Authorization;
 using System.Net.Mail;
 using System.Net;
 
-namespace WebApplication3.Areas.Admin.Controllers
+namespace WebApplication3.Controllers
 {
-    [Area("Admin")]
+
     [AllowAnonymous]
     public class AuthController : Controller
     {
@@ -243,6 +243,12 @@ namespace WebApplication3.Areas.Admin.Controllers
             await _authService.UpdateUserAsync(user);
 
             ViewBag.Message = "Password has been reset successfully!";
+            return View();
+        }
+
+        public IActionResult AccessDenied(string returnUrl)
+        {
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
     }

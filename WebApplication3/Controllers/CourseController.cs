@@ -10,8 +10,7 @@ using WebApplication3.ViewModels;
 
 namespace WebApplication3.Controllers
 {
-    [Authorize]
-/*    [Area("Courses")]*/
+    [Authorize(Roles = "SuperAdmin")]
     public class CourseController : Controller
     {
         private readonly ICourseService _courseService;
@@ -46,7 +45,6 @@ namespace WebApplication3.Controllers
         }
 
         // GET: Course/Create
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -66,7 +64,6 @@ namespace WebApplication3.Controllers
         }
 
         // POST: Course/Create
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CourseViewModel model)
@@ -95,7 +92,6 @@ namespace WebApplication3.Controllers
         }
 
         // GET: Course/Edit/5
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         public async Task<IActionResult> Edit(int id)
         {
             var course = await _courseService.GetCourseByIdAsync(id);
@@ -116,7 +112,6 @@ namespace WebApplication3.Controllers
         }
 
         // POST: Course/Edit/5
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(CourseViewModel vm)
@@ -139,7 +134,6 @@ namespace WebApplication3.Controllers
         }
 
         // GET: Course/Delete/5
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         public async Task<IActionResult> Delete(int id)
         {
             var course = await _courseService.GetCourseByIdAsync(id);
@@ -150,7 +144,6 @@ namespace WebApplication3.Controllers
         }
 
         // POST: Course/Delete/5
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         [HttpPost, ActionName("DeleteConfirmed")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

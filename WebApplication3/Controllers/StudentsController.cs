@@ -10,7 +10,7 @@ using WebApplication3.ViewModels;
 
 namespace WebApplication3.Controllers
 {
-    [Authorize] // حماية الوصول لجميع الأفعال للمستخدمين المصادق عليهم
+    [Authorize(Roles = "SuperAdmin,Admin")]
     public class StudentsController : Controller
     {
         private readonly IStudentService _studentService;
@@ -38,7 +38,6 @@ namespace WebApplication3.Controllers
         }
 
         // GET: Students/Create
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         public async Task<IActionResult> Create()
         {
             await LoadDropdowns();
@@ -47,7 +46,6 @@ namespace WebApplication3.Controllers
 
         // POST: Students/Create
         [HttpPost]
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(StudentViewModel studentViewModel)
         {
@@ -70,7 +68,6 @@ namespace WebApplication3.Controllers
         }
 
         // GET: Students/Edit/5
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         public async Task<IActionResult> Edit(int id)
         {
             var studentViewModel = await _studentService.GetStudentByIdAsync(id);
@@ -85,7 +82,6 @@ namespace WebApplication3.Controllers
 
         // POST: Students/Edit/5
         [HttpPost]
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, StudentViewModel studentViewModel)
         {
@@ -113,7 +109,6 @@ namespace WebApplication3.Controllers
         }
 
         // GET: Students/Delete/5
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         public async Task<IActionResult> Delete(int id)
         {
             var studentViewModel = await _studentService.GetStudentByIdAsync(id);
@@ -127,7 +122,6 @@ namespace WebApplication3.Controllers
 
         // POST: Students/Delete/5
         [HttpPost, ActionName("Delete")]
-        [Authorize(Roles = "Admin")] // فقط للمستخدمين من دور "Admin"
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
