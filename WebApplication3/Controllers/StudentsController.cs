@@ -14,16 +14,19 @@ namespace WebApplication3.Controllers
     public class StudentsController : Controller
     {
         private readonly IStudentService _studentService;
-        private readonly SchoolContext _context;
+        private readonly ICourseService _courseService;
+        private readonly ITeacherService _teacherService;
         private readonly IMapper _mapper;
 
         public StudentsController(
             IStudentService studentService,
-            SchoolContext context,
+            ICourseService courseService,
+            ITeacherService teacherService,
             IMapper mapper)
         {
             _studentService = studentService;
-            _context = context;
+            _courseService = courseService;
+            _teacherService = teacherService;
             _mapper = mapper;
         }
 
@@ -144,16 +147,11 @@ namespace WebApplication3.Controllers
 
         private async Task LoadDropdowns(int? selectedCourseId = null, int? selectedTeacherId = null)
         {
-            var courses = await _context.Courses
-                .Where(c => !c.IsDeleted)
-                .Select(c => new CourseViewModel { Id = c.Id, Name = c.Name })
-                .ToListAsync();
+            // استدعاء خدمات الكورسات والمدرسين
+            var courses = await _courseService.GetAllCoursesAsync();
+            var teachers = await _teacherService.GetAllTeachersAsync();
 
-            var teachers = await _context.Teachers
-                .Where(t => !t.IsDeleted)
-                .Select(t => new TeacherViewModel { Id = t.Id, Name = t.Name })
-                .ToListAsync();
-
+            // تعبئة الـ ViewBag بالبيانات
             ViewBag.Courses = new SelectList(courses, "Id", "Name", selectedCourseId);
             ViewBag.Teachers = new SelectList(teachers, "Id", "Name", selectedTeacherId);
         }

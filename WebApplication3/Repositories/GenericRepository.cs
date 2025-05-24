@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WebApplication3.Data;
+using WebApplication3.GenaricISpecification;
 using WebApplication3.Repositories;
 
 public class GenericRepository<T> : IGenericRepository<T> where T : class
@@ -50,5 +51,19 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
     public async Task SaveAsync()
     {
         await _context.SaveChangesAsync();
+    }
+
+
+
+    public async Task<IEnumerable<T>> GetAllWithSpecAsync(ISpecification<T> spec)
+    {
+        var query = SpecificationEvaluator<T>.GetQuery(_dbSet.AsQueryable(), spec);
+        return await query.ToListAsync();
+    }
+
+    public async Task<T?> GetBySpecAsync(ISpecification<T> spec)
+    {
+        var query = SpecificationEvaluator<T>.GetQuery(_dbSet.AsQueryable(), spec);
+        return await query.FirstOrDefaultAsync();
     }
 }

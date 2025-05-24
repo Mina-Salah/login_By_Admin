@@ -308,6 +308,29 @@ body {
     color: white;
 }
 
+/* Button Styles */
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+    .btn-danger:hover {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+
+
+
+.sidebar-collapsed #sidebar {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+}
+
+.sidebar-collapsed .main-content {
+    margin-left: 0 !important;
+    transition: margin 0.3s ease;
+}
 /* Alert Styles */
 .alert {
     border: none;
